@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Personal Finance Advisor</title>
+
+  <!-- Google Font (optional but looks nicer) -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Your CSS -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Markdown Renderer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <div class="card">
+      <h1>AI Personal Finance Advisor</h1>
+      <p class="subtitle">Enter your details and get a personalized budget plan powered by Agentic AI.</p>
+
+      <form id="financeForm">
+        <label for="income">Monthly Income</label>
+        <input type="number" id="income" placeholder="e.g. 50000" required />
+
+        <label for="expenses">Expenses  
+          <span class="hint">(Format: rent:15000, food:6000, travel:3000)</span>
+        </label>
+        <textarea id="expenses" placeholder="rent:15000, food:6000, travel:3000" required></textarea>
+
+        <label for="savings_goal">Savings Goal (Monthly)</label>
+        <input type="number" id="savings_goal" placeholder="e.g. 10000" />
+
+        <label for="debt">Debt Amount</label>
+        <input type="number" id="debt" placeholder="e.g. 2000" />
+
+        <label for="risk">Risk Level</label>
+        <select id="risk">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+
+        <button type="submit">Generate Financial Plan</button>
+      </form>
+    </div>
+
+    <div class="card output-card">
+      <h2>AI Financial Plan</h2>
+      <div id="output" class="output-box">
+        <p class="placeholder-text">Your detailed plan will appear here after you submit the form.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Your JS -->
+  <script src="script.js"></script>
+</body>
+</html>
