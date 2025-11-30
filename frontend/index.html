@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Personal Finance Advisor</title>
 
-  <!-- Google Font (optional but looks nicer) -->
+  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <!-- Your CSS -->
@@ -14,6 +14,7 @@
   <!-- Markdown Renderer -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
+
 <body>
   <div class="app-container">
     <div class="card">
@@ -21,6 +22,7 @@
       <p class="subtitle">Enter your details and get a personalized budget plan powered by Agentic AI.</p>
 
       <form id="financeForm">
+        
         <label for="income">Monthly Income</label>
         <input type="number" id="income" placeholder="e.g. 50000" required />
 
@@ -54,7 +56,11 @@
     </div>
   </div>
 
-  <!-- Your JS -->
+  <!-- Load backend URL FIRST -->
+  <script src="config.js"></script>
+
+  <!-- Main JS -->
   <script src="script.js"></script>
+
 </body>
 </html>
