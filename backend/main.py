@@ -125,26 +125,33 @@ def generate_plan(data: FinanceInput):
     )
 
     task2 = Task(
-        description=(
-            context +
-            "\n\nCreate a clean Markdown long-term investment plan.\n"
-            "MUST INCLUDE:\n"
-            "1. Short risk profile explanation\n"
-            "2. Asset allocation table (Equity / Bonds / Cash)\n"
-            "3. Recommended investment types:\n"
-            "   - Global index funds\n"
-            "   - Bond funds\n"
-            "   - Cash/emergency reserves\n"
-            "4. Monthly investment breakdown table based on surplus (SIP style)\n"
-            "5. Beginner investment tips (around 5 bullet points)\n\n"
-            "RULES:\n"
-            "- Use Markdown tables where requested\n"
-            "- No backticks, no code blocks\n"
-            "- Keep it general and universal (no country-specific funds)\n"
-        ),
-        expected_output="Markdown formatted global investment plan.",
-        agent=investment_agent
-    )
+    description=(
+        context +
+        "\n\nCreate a clean Markdown long-term investment plan.\n"
+        "You MUST adjust the asset allocation based on risk:\n"
+        "LOW RISK:\n"
+        "  Equity 20–40%, Bonds 50–70%, Cash 10–20%\n"
+        "MEDIUM RISK:\n"
+        "  Equity 50–70%, Bonds 20–40%, Cash 5–10%\n"
+        "HIGH RISK:\n"
+        "  Equity 70–90%, Bonds 10–20%, Cash 0–10%\n\n"
+        "MUST INCLUDE:\n"
+        "1. Short risk profile explanation\n"
+        "2. Markdown asset allocation table:\n"
+        "   | Asset Class | Allocation | Description |\n"
+        "3. Recommended investment types (global index funds, bond funds, cash)\n"
+        "4. Monthly investment breakdown table based on the user's surplus:\n"
+        "   | Investment Type | Allocation | Monthly Amount |\n"
+        "5. Beginner tips (5 bullets)\n\n"
+        "RULES:\n"
+        "- Use Markdown tables\n"
+        "- NO backticks, NO code blocks\n"
+        "- Simple English explanations"
+    ),
+    expected_output="Markdown formatted global investment plan.",
+    agent=investment_agent
+)
+
 
     # ---------------------------------------------------
     # CREW
