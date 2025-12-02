@@ -40,7 +40,10 @@ document.getElementById("financeForm").addEventListener("submit", async function
     }
 });
 
-// MARKDOWN PROCESSOR
+
+// ----------------------------------------------------
+// CLEAN + RENDER MARKDOWN
+// ----------------------------------------------------
 function processMarkdownAndDisplay(data) {
     const outputDiv = document.getElementById("output");
 
@@ -49,12 +52,22 @@ function processMarkdownAndDisplay(data) {
         return;
     }
 
-    let text = "";
+    // extract text
+    let text = data.advice || data.final_output || (typeof data === "string" ? data : "");
 
-    if (data.advice) text = data.advice;
-    else if (data.final_output) text = data.final_output;
-    else if (typeof data === "string") text = data;
-    else text = "```\n" + JSON.stringify(data, null, 2) + "\n```";
+    // ---------- CLEANING LAYER (MOST IMPORTANT) ----------
+   text = text
+    .replace(/```[\s\S]*?```/g, "")          // Remove triple backticks
+    .replace(/`([^`]+)`/g, "$1")             // Remove inline backticks
+    .replace(/^\s{4,}/gm, "")                // Remove indentation (makes code blocks)
+    .replace(/^\t+/gm, "")                   // Remove tabs
+    .replace(/^\s+$/gm, "")                  // Remove empty whitespace-only lines
+    .replace(/^markdown\s*$/gim, "");        // Remove "markdown" lines
+             // remove empty whitespace-only lines
 
+    // remove repeated blank lines
+    text = text.split("\n").filter(line => line.trim() !== "").join("\n");
+
+    // ---------- RENDER CLEAN MARKDOWN ----------
     outputDiv.innerHTML = marked.parse(text);
 }

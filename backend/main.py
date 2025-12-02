@@ -4,37 +4,37 @@ from crewai import Agent, Task, Crew, LLM
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import re  # for cleaning regex
 
 # Load .env file
 load_dotenv()
 
-
-# Single API key (simple setup)
+# API Key
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found! Add it to your .env file.")
 
-# Configure Gemini LLM
+# LLM Config
 gemini_llm = LLM(
     model="gemini/gemini-2.0-flash",
     api_key=GEMINI_API_KEY,
     temperature=0.3
 )
 
-# FastAPI app
+# FastAPI App
 app = FastAPI()
 
-# Enable CORS (local + render)
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # allow all for simplicity
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Request model
+# Request Model
 class FinanceInput(BaseModel):
     income: float
     expenses: dict
@@ -42,77 +42,186 @@ class FinanceInput(BaseModel):
     debt: float = 0
     risk_level: str = "medium"
 
+
 @app.get("/")
 def home():
     return {"message": "AI Personal Finance Advisor API is running 🚀"}
+
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
+
 @app.post("/plan")
 def generate_plan(data: FinanceInput):
 
+    # Shared context for both agents
     context = (
-        f"User Income: {data.income}\n"
+        f"Income: {data.income}\n"
         f"Expenses: {data.expenses}\n"
         f"Savings Goal: {data.savings_goal}\n"
         f"Debt: {data.debt}\n"
         f"Risk Level: {data.risk_level}\n"
     )
 
-    # ---------- 2 Agents ----------
-    # Agent 1: Budget + Savings
+    # ---------------------------------------------------
+    # AGENTS (GLOBAL, GENERAL)
+    # ---------------------------------------------------
+
     budget_agent = Agent(
-        role="Budget & Savings Analyst",
-        goal="Create the monthly budget and savings/debt strategy.",
-        backstory="Expert in budgeting, financial planning & savings structure.",
+        role="Global Budgeting Expert",
+        goal=(
+            "Create a clear, simple monthly budget using universal categories and "
+            "financial best practices. Output must be clean Markdown."
+        ),
+        backstory=(
+            "You are a professional financial planner helping clients worldwide. "
+            "You follow global budgeting standards such as the 50/30/20 rule, "
+            "expense categorization, surplus calculation, and savings strategy. "
+            "Your tone is friendly, simple, and beginner-friendly."
+        ),
         llm=gemini_llm,
-        verbose=True
+        verbose=True  # logs in console only
     )
 
-    # Agent 2: Investment Advisor
     investment_agent = Agent(
-        role="Investment Advisor",
-        goal="Recommend investments based on risk level.",
-        backstory="Expert in low-risk and medium-risk investment strategies.",
+        role="Global Investment Advisor",
+        goal=(
+            "Create a simple long-term investment plan using global investment "
+            "principles: index funds, ETFs, bonds, diversification, and risk-based "
+            "allocation. Output must be clean Markdown."
+        ),
+        backstory=(
+            "You specialize in low-cost investing using global diversified index funds, "
+            "bond funds, cash reserves, ETFs, and basic portfolio allocation. "
+            "Advice must be beginner-friendly and long-term focused."
+        ),
         llm=gemini_llm,
-        verbose=True
+        verbose=True  # logs in console only
     )
 
-    # ---------- Tasks ----------
+    # ---------------------------------------------------
+    # TASKS
+    # ---------------------------------------------------
+
     task1 = Task(
         description=(
             context +
-            "\nTask: Create a clear monthly budget summary using markdown. "
-            "Include Needs/Wants/Savings percentages, surplus, debt payoff strategy, "
-            "and emergency fund plan. Use tables."
+            "\n\nCreate a clean Markdown monthly budget.\n"
+            "MUST INCLUDE:\n"
+            "1. Table: Income, Total Expenses, Surplus/Deficit\n"
+            "2. Needs / Wants / Savings (50-30-20 rule table)\n"
+            "3. Expense Breakdown Table (each expense individually)\n"
+            "4. Savings & Debt Strategy (short bullets)\n"
+            "5. Monthly action steps (around 5–7 bullet points)\n\n"
+            "RULES:\n"
+            "- Use Markdown tables where requested\n"
+            "- No backticks, no code blocks\n"
+            "- Keep explanations short and simple\n"
         ),
-        expected_output="Markdown budget + savings plan.",
+        expected_output="Markdown formatted global budget plan.",
         agent=budget_agent
     )
 
     task2 = Task(
         description=(
             context +
-            "\nTask: Suggest a simple monthly investment plan based on risk profile. "
-            "Include asset allocation and example index funds/ETFs."
+            "\n\nCreate a clean Markdown long-term investment plan.\n"
+            "MUST INCLUDE:\n"
+            "1. Short risk profile explanation\n"
+            "2. Asset allocation table (Equity / Bonds / Cash)\n"
+            "3. Recommended investment types:\n"
+            "   - Global index funds\n"
+            "   - Bond funds\n"
+            "   - Cash/emergency reserves\n"
+            "4. Monthly investment breakdown table based on surplus (SIP style)\n"
+            "5. Beginner investment tips (around 5 bullet points)\n\n"
+            "RULES:\n"
+            "- Use Markdown tables where requested\n"
+            "- No backticks, no code blocks\n"
+            "- Keep it general and universal (no country-specific funds)\n"
         ),
-        expected_output="Markdown investment strategy.",
+        expected_output="Markdown formatted global investment plan.",
         agent=investment_agent
     )
 
-    # ---------- Crew ----------
+    # ---------------------------------------------------
+    # CREW
+    # ---------------------------------------------------
     crew = Crew(
         agents=[budget_agent, investment_agent],
         tasks=[task1, task2],
-        verbose=True
+        verbose=False  # crew-level logs minimal
     )
 
     result = crew.kickoff()
-    final_text = str(result)
+
+    # ---------------------------------------------------
+    # Helper: safely extract text from TaskOutput across versions
+    # ---------------------------------------------------
+    def task_output_to_text(task_output) -> str:
+        """
+        Try several common attributes used in different CrewAI versions.
+        Fallback to str(task_output) if nothing else works.
+        """
+        for attr in ("output_text", "final_output", "raw", "result", "completion"):
+            val = getattr(task_output, attr, None)
+            if isinstance(val, str) and val.strip():
+                return val
+        return str(task_output)
+
+    # ---------------------------------------------------
+    # Extract raw outputs from tasks
+    # ---------------------------------------------------
+    try:
+        t1_raw = task_output_to_text(result.tasks_output[0])
+        t2_raw = task_output_to_text(result.tasks_output[1])
+    except Exception:
+        # Fallback: if tasks_output behaves differently, use overall result
+        t1_raw = ""
+        t2_raw = str(result)
+
+    # ---------------------------------------------------
+    # CLEANING FUNCTION (your clean(text) included)
+    # ---------------------------------------------------
+    def clean(text: str) -> str:
+        if not text:
+            return ""
+        remove_list = [
+            "╭", "╰", "│", "─",
+            "Crew Execution Started", "Final Answer:", "Agent:", "Task:",
+            "Name:", "ID:", "Tool Args:", "Crew:",
+            "```markdown", "```", "`", "None"
+        ]
+        for r in remove_list:
+            text = text.replace(r, "")
+
+        # remove 'markdown' when it's alone on a line
+        text = re.sub(r"(?im)^\s*markdown\s*$", "", text)
+
+        # strip empty lines
+        lines = [l.strip() for l in text.split("\n") if l.strip()]
+        return "\n".join(lines)
+
+    # Clean both outputs
+    task1_output = clean(t1_raw)
+    task2_output = clean(t2_raw)
+
+    # ---------------------------------------------------
+    # Combine final Markdown for frontend
+    # ---------------------------------------------------
+    final_markdown = f"""
+## 🧾 Monthly Budget Plan
+{task1_output}
+
+---
+
+## 📈 Investment Plan
+{task2_output}
+""".strip()
 
     return {
-        "advice": final_text,
-        "budget_plan": data.expenses  # keeps your frontend working
+        "advice": final_markdown,
+        "raw_expenses": data.expenses
     }

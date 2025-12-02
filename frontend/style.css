@@ -1,3 +1,7 @@
+/* ------------------------- */
+/* GLOBAL STYLING           */
+/* ------------------------- */
+
 * {
   box-sizing: border-box;
 }
@@ -9,6 +13,10 @@ body {
   background: #eef2f7;
   color: #222;
 }
+
+/* ------------------------- */
+/* LAYOUT                    */
+/* ------------------------- */
 
 .app-container {
   max-width: 1100px;
@@ -25,6 +33,10 @@ body {
   padding: 22px 20px 24px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 }
+
+/* ------------------------- */
+/* FORM & TYPOGRAPHY        */
+/* ------------------------- */
 
 h1 {
   margin: 0 0 6px;
@@ -96,8 +108,7 @@ button {
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
   cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease,
-    background 0.12s ease;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 button:hover {
@@ -110,6 +121,10 @@ button:active {
   box-shadow: none;
 }
 
+/* ------------------------- */
+/* OUTPUT AREA               */
+/* ------------------------- */
+
 .output-card {
   display: flex;
   flex-direction: column;
@@ -117,15 +132,16 @@ button:active {
 
 .output-box {
   margin-top: 6px;
-  padding: 14px 12px;
-  border-radius: 10px;
+  padding: 18px 20px;
+  border-radius: 12px;
   border: 1px solid #e0e3eb;
-  background: #fafbff;
+  background: #ffffff;
   min-height: 120px;
   max-height: 75vh;
   overflow-y: auto;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.6;
+  color: #333;
 }
 
 .placeholder-text {
@@ -133,39 +149,87 @@ button:active {
   font-size: 13px;
 }
 
-/* Style markdown content */
+/* ----------------------------- */
+/* BEAUTIFUL MARKDOWN STYLING   */
+/* ----------------------------- */
 
 .output-box h1,
 .output-box h2,
 .output-box h3 {
-  margin-top: 12px;
-  margin-bottom: 8px;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.3;
+  margin-top: 20px;
+  margin-bottom: 12px;
+}
+
+.output-box h2 {
+  font-size: 20px;
 }
 
 .output-box h3 {
-  font-size: 16px;
+  font-size: 17px;
 }
 
 .output-box p {
-  margin: 6px 0;
+  margin: 12px 0;
 }
 
-.output-box ul {
-  padding-left: 20px;
-  margin: 6px 0;
+/* Lists */
+.output-box ul,
+.output-box ol {
+  margin: 10px 0 10px 22px;
+  padding-left: 18px;
 }
 
 .output-box li {
-  margin: 3px 0;
+  margin: 6px 0;
 }
 
-/* Tables from markdown */
+/* Bold + Italic */
+.output-box strong {
+  font-weight: 600;
+  color: #111;
+}
 
+.output-box em {
+  color: #444;
+}
+
+/* Horizontal line */
+.output-box hr {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid #d1d5db;
+}
+
+/* Inline code */
+.output-box code {
+  background: #f1f5f9;
+  padding: 3px 6px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: "Consolas", monospace;
+}
+
+/* Code blocks */
+.output-box pre {
+  background: #1e293b;
+  color: #f8fafc;
+  padding: 14px;
+  border-radius: 10px;
+  overflow-x: auto;
+  margin: 16px 0;
+  font-size: 14px;
+  font-family: "Consolas", monospace;
+}
+
+/* Tables */
 .output-box table {
   width: 100%;
   border-collapse: collapse;
-  margin: 10px 0;
-  font-size: 13px;
+  margin: 16px 0;
+  font-size: 14px;
 }
 
 .output-box table,
@@ -176,16 +240,28 @@ button:active {
 
 .output-box th,
 .output-box td {
-  padding: 6px 8px;
-  text-align: left;
+  padding: 8px 10px;
 }
 
 .output-box th {
-  background-color: #e5edff;
+  background-color: #e8f0ff;
   font-weight: 600;
 }
 
-/* Mobile responsive */
+/* Blockquotes */
+.output-box blockquote {
+  border-left: 4px solid #2563eb;
+  padding-left: 12px;
+  color: #475569;
+  margin: 14px 0;
+  font-style: italic;
+  background: #f1f5ff;
+  border-radius: 4px;
+}
+
+/* ------------------------- */
+/* RESPONSIVE DESIGN         */
+/* ------------------------- */
 
 @media (max-width: 900px) {
   .app-container {
